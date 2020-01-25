@@ -1,4 +1,3 @@
-import 'package:channel/channel.dart';
 import 'package:test/test.dart';
 
 void main() {

@@ -17,6 +17,8 @@ abstract class Channel<T> {
 
   Future<ChannelEvent<T>> receive();
 
+  Future<T> tryReceive({T onClose});
+
   Stream<ChannelEvent<T>> asStream();
 
   bool get isClosed;
@@ -40,7 +42,7 @@ class NonBlockingChannel<T> implements Channel<T> {
 
   @override
   Future<ChannelEvent<T>> receive() async {
-    if(_isClosed && _data.isEmpty) {
+    if (_isClosed && _data.isEmpty) {
       return ChannelEvent<T>(null, true);
     }
 
@@ -53,6 +55,14 @@ class NonBlockingChannel<T> implements Channel<T> {
     return completer.future;
   }
 
+  @override
+  Future<T> tryReceive({T onClose}) async {
+    final data = await receive();
+    if(!data.isClosed) return data.data;
+    return onClose;
+  }
+
+  @override
   Stream<ChannelEvent<T>> asStream() {
     final controller = StreamController<ChannelEvent<T>>();
 
@@ -82,6 +92,7 @@ class NonBlockingChannel<T> implements Channel<T> {
     return controller.stream;
   }
 
+  @override
   bool get isClosed => _isClosed;
 
   @override
