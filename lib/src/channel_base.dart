@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'dart:math';
 
 class ChannelEvent<T> {
-  final T data;
+  final T? data;
 
   final bool isClosed;
 
@@ -13,13 +13,13 @@ class ChannelEvent<T> {
 abstract class Channel<T> {
   factory Channel() = NonBlockingChannel<T>;
 
-  FutureOr<void> send(T value);
+  FutureOr<void> send(T? value);
 
-  Future<ChannelEvent<T>> receive();
+  Future<ChannelEvent<T?>> receive();
 
-  Future<T> tryReceive({T onClose});
+  Future<T?> tryReceive({T? onClose});
 
-  Stream<ChannelEvent<T>> asStream();
+  Stream<ChannelEvent<T?>> asStream();
 
   bool get isClosed;
 
@@ -27,44 +27,45 @@ abstract class Channel<T> {
 }
 
 class NonBlockingChannel<T> implements Channel<T> {
-  final _data = Queue<T>();
+  final Queue<T?> _data = Queue<T?>();
 
-  final _completers = Queue<Completer<ChannelEvent<T>>>();
+  final _completers = Queue<Completer<ChannelEvent<T?>>>();
 
   bool _isClosed = false;
 
   @override
-  void send(T value) {
+  void send(T? value) {
     if (isClosed) throw Exception('Channel is closed');
     _data.add(value);
     _send();
   }
 
   @override
-  Future<ChannelEvent<T>> receive() async {
+  Future<ChannelEvent<T?>> receive() async {
     if (_isClosed && _data.isEmpty) {
-      return ChannelEvent<T>(null, true);
+      return ChannelEvent<T?>(null, true);
     }
 
     if (_data.isNotEmpty && _completers.isEmpty) {
-      return ChannelEvent<T>(_data.removeFirst(), false);
+      return ChannelEvent<T?>(_data.removeFirst(), false);
     }
 
-    final completer = Completer<ChannelEvent<T>>();
+    final completer = Completer<ChannelEvent<T?>>();
     _completers.add(completer);
     return completer.future;
   }
 
   @override
-  Future<T> tryReceive({T onClose}) async {
+  Future<T?> tryReceive({T? onClose}) async {
     final data = await receive();
-    if(!data.isClosed) return data.data;
+    if (!data.isClosed) return data.data;
     return onClose;
   }
 
   @override
-  Stream<ChannelEvent<T>> asStream() {
-    final controller = StreamController<ChannelEvent<T>>();
+  Stream<ChannelEvent<T?>> asStream() {
+    final StreamController<ChannelEvent<T?>> controller =
+        StreamController<ChannelEvent<T?>>();
 
     void loop() async {
       bool isCancelled = false;
@@ -101,8 +102,8 @@ class NonBlockingChannel<T> implements Channel<T> {
     _send();
 
     while (_completers.isNotEmpty) {
-      final completer = _completers.removeFirst();
-      completer.complete(ChannelEvent<T>(null, true));
+      final Completer<ChannelEvent<T?>> completer = _completers.removeFirst();
+      completer.complete(ChannelEvent<T?>(null, true));
     }
   }
 
@@ -111,9 +112,9 @@ class NonBlockingChannel<T> implements Channel<T> {
 
     final n = min<int>(_data.length, _completers.length);
     for (int i = 0; i < n; i++) {
-      final completer = _completers.removeFirst();
+      final Completer<ChannelEvent<T?>> completer = _completers.removeFirst();
       final data = _data.removeFirst();
-      completer.complete(ChannelEvent<T>(data, false));
+      completer.complete(ChannelEvent<T?>(data, false));
     }
   }
 }
