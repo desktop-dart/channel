@@ -19,9 +19,9 @@ void main() async {
 
   futures.add(Future.microtask(() async {
     while (true) {
-      final data = await channel.receive();
-      if (!data.isClosed) {
-        print('In second task: ${data.data}');
+      final data = await channel.tryReceive();
+      if (data != null) {
+        print('In second task: $data');
       } else {
         print('Second task closed');
         break;
@@ -29,14 +29,7 @@ void main() async {
     }
   }));
 
-  for (int i = 0; i < 10; i++) {
-    channel.send(i);
-    if(i % 3 == 0) {
-      await Future.delayed(Duration(microseconds: 1));
-    }
-  }
-  print('all values sent');
-
+  await channel.pipe(Stream.fromIterable(Iterable.generate(10, (i) => i)));
   channel.close();
 
   await Future.wait(futures);
