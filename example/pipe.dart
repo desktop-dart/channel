@@ -1,5 +1,4 @@
 import 'package:channel/channel.dart';
-import 'package:pedantic/pedantic.dart';
 
 void main() async {
   final channel = Channel<int>();

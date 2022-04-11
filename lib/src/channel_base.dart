@@ -3,6 +3,8 @@ import 'nonblocking.dart';
 
 export 'nonblocking.dart';
 
+/// An event on the channel. Could be a data event, in which case [isClosed] is
+/// false.
 class ChannelEvent<T> {
   final T? data;
 
@@ -11,6 +13,7 @@ class ChannelEvent<T> {
   ChannelEvent(this.data, this.isClosed);
 }
 
+/// Golang like channel to send/buffer/receive data
 abstract class Channel<T> {
   factory Channel() = NonBlockingChannel<T>;
 

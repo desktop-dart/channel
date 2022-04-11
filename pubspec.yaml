@@ -1,9 +1,7 @@
 name: channel
 description: Golang like send/receive communication channel with multi-listen capability
-version: 2.0.0
+version: 2.0.1
 homepage: https://github.com/desktop-dart/channel
-authors:
-  - Ravi Teja Gudapati <tejainece@gmail.com>
 
 environment:
   sdk: '>=2.12.0 <3.0.0'

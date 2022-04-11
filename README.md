@@ -22,6 +22,18 @@ main() async {
 }
 ```
 
+## Pipe
+
+`pipe` method offers a way to pipe the contents of the given stream into the channel.
+
+```dart
+main() async {
+  final channel = Channel<int>();
+  await channel.pipe(Stream.fromIterable(Iterable.generate(10, (i) => i)));
+  channel.close();
+}
+```
+
 ```dart
 main() async {
   final channel = Channel<int>();
