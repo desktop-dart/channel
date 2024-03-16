@@ -1,3 +1,7 @@
+## 2.0.2
+
++ Migrated to Dart 3.0
+
 ## 2.0.1
 
 + Added `pipe` method
